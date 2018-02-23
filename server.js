@@ -1,21 +1,21 @@
-require("dotenv").config();
-const express = require("express");
-const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
-const passport = require("passport");
-const morgan = require("morgan");
+require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const morgan = require('morgan');
 const cors = require('cors');
-// const { router: userRouter } = require("./user/router");
-// const { router: authRouter } = require("./auth/router");
-// const { localStrategy, jwtStrategy } = require("./auth/strategies");
+const { router: userRouter } = require('./users/router');
+const { router: authRouter } = require('./auth/router');
+const { localStrategy, jwtStrategy } = require('./auth/strategies');
 
 mongoose.Promise = global.Promise;
 
-const { PORT, DATABASE_URL, CLIENT_ORIGIN } = require("./config");
+const { PORT, DATABASE_URL, CLIENT_ORIGIN } = require('./config');
 
 const app = express();
 
-app.use(morgan("common"));
+app.use(morgan('common'));
 
 app.use(
   cors({
@@ -23,11 +23,11 @@ app.use(
   })
 );
 
-// passport.use(localStrategy);
-// passport.use(jwtStrategy);
+passport.use(localStrategy);
+passport.use(jwtStrategy);
 
-// app.use("/api/auth/", authRouter);
-// app.use("/api/user/", userRouter);
+app.use('/api/auth/', authRouter);
+app.use('/api/users/', userRouter);
 mongoose.connect(DATABASE_URL);
 
 const jwtAuth = passport.authenticate('jwt', { session: false });
@@ -38,7 +38,7 @@ app.get('/api/protected', jwtAuth, (req, res) => {
   });
 });
 
-app.get("/api/", (req, res) => {
+app.get('/api/', (req, res) => {
   res.json({ ok: true });
 });
 
@@ -49,7 +49,7 @@ function runServer() {
     server = app.listen(PORT, () => {
       console.log(`Your app is listening on port ${PORT}`);
       resolve(server);
-    }).on("error", err => {
+    }).on('error', err => {
       reject(err)
     });
   });
@@ -57,7 +57,7 @@ function runServer() {
 
 function closeServer() {
   return new Promise((resolve, reject) => {
-    console.log("Closing server");
+    console.log('Closing server');
     server.close(err => {
       if (err) {
         reject(err);
